@@ -10,17 +10,13 @@ import (
 
 const FPS = 30
 
-type GameLoopData struct {
-	score int
-}
-
 type Loop interface {
 	Initialize() error
 	Render() error
 	Calculate(c keyboard.Key) error
 }
 
-func Start (gl Loop) {
+func Start(gl Loop) {
 	if err := keyboard.Open(); err != nil {
 		panic(err)
 	}
@@ -28,14 +24,16 @@ func Start (gl Loop) {
 		_ = keyboard.Close()
 	}()
 
-	err := gl.Initialize()
+	if err := gl.Initialize(); err != nil {
+		panic(err)
+	}
 
 	limiter := time.Tick((1000 * time.Millisecond) / FPS)
-	for err == nil {
+	for {
 		<-limiter
 		screen.Clear()
-		fmt.Print("\033[H");
-        go gl.Render()
+		fmt.Print("\033[H")
+		go gl.Render()
 
 		_, key, err := keyboard.GetKey()
 		if err != nil {
@@ -47,5 +45,5 @@ func Start (gl Loop) {
 		}
 
 		go gl.Calculate(key)
-    }
+	}
 }

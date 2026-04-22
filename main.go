@@ -2,47 +2,52 @@ package main
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/eiannone/keyboard"
 	gameloop "renfoc.us/game_loop/lib"
 )
 
-var direction = "";
+var (
+	direction string
+	mu        sync.RWMutex
+)
 
-type Data struct {}
+type Data struct{}
 
 func (data Data) Initialize() error {
-	direction = fmt.Sprint("starting...");
+	mu.Lock()
+	defer mu.Unlock()
+	direction = "starting..."
 
-	return nil;
+	return nil
 }
 
 func (data Data) Render() error {
-	fmt.Println(direction);
+	mu.RLock()
+	defer mu.RUnlock()
+	fmt.Println(direction)
 
-	return nil;
+	return nil
 }
 
 func (data Data) Calculate(key keyboard.Key) error {
+	mu.Lock()
+	defer mu.Unlock()
 	switch key {
 	case keyboard.KeyArrowDown:
 		direction = "down"
-		break;
 	case keyboard.KeyArrowUp:
 		direction = "up"
-		break;
 	case keyboard.KeyArrowLeft:
 		direction = "left"
-		break;
 	case keyboard.KeyArrowRight:
 		direction = "right"
-		break;
 	case keyboard.KeySpace:
 		direction = "space"
-		break;
 	}
 
-	return nil;
+	return nil
 }
 
 func main() {
